@@ -10,14 +10,18 @@ import ru.netology.service.PostService;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MainServlet extends HttpServlet {
 
     private PostController controller;
+    private final List<String> METHODS = Arrays.asList("GET", "POST", "DELETE");
 
     private final Map<String, Map<String, Handler>> handlers = new ConcurrentHashMap<>();
+    private static final String BASE_PATH = "/";
     private static final String PATH = "/api/posts";
     private static final String PATH_WITH_PARAMS = "/api/posts/";
 
@@ -27,11 +31,11 @@ public class MainServlet extends HttpServlet {
         final PostService service = new PostService(repository);
         controller = new PostController(service);
 
-        addHandler("GET", PATH, (path, req, resp) -> {
+        addHandler(METHODS.get(0), PATH, (path, req, resp) -> {
             controller.all(resp);
             resp.setStatus(HttpServletResponse.SC_OK);
         });
-        addHandler("GET", PATH_WITH_PARAMS, (path, req, resp) -> {
+        addHandler(METHODS.get(0), PATH_WITH_PARAMS, (path, req, resp) -> {
             try {
                 controller.getById(getIdByParsePath(path), resp);
                 resp.setStatus(HttpServletResponse.SC_OK);
@@ -39,11 +43,11 @@ public class MainServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         });
-        addHandler("POST", PATH, (path, req, resp) -> {
+        addHandler(METHODS.get(1), PATH, (path, req, resp) -> {
             controller.save(req.getReader(), resp);
             resp.setStatus(HttpServletResponse.SC_OK);
         });
-        addHandler("DELETE", PATH_WITH_PARAMS, (path, req, resp) -> {
+        addHandler(METHODS.get(2), PATH_WITH_PARAMS, (path, req, resp) -> {
             try {
                 controller.removeById(getIdByParsePath(path), resp);
                 resp.setStatus(HttpServletResponse.SC_OK);
@@ -86,6 +90,6 @@ public class MainServlet extends HttpServlet {
 
     private long getIdByParsePath(String path) {
         // easy way
-        return Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
+        return Long.parseLong(path.substring(path.lastIndexOf(BASE_PATH) + 1));
     }
 }
