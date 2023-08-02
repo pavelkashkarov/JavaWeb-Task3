@@ -1,5 +1,6 @@
 package ru.netology.repository;
 
+import org.springframework.stereotype.Repository;
 import ru.netology.model.Post;
 
 import java.util.ArrayList;
@@ -7,7 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+@Repository
 public class PostRepositoryImpl implements PostRepository {
 
     private final List<Post> posts = Collections.synchronizedList(new ArrayList<>());
@@ -15,7 +18,9 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public List<Post> all() {
-        return posts;
+        return posts.stream()
+                .filter(post -> !post.isRemoved())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -44,7 +49,8 @@ public class PostRepositoryImpl implements PostRepository {
     public boolean removeById(long id) {
         Post p = findPostById(id);
         if (p != null) {
-            posts.remove(p);
+            p.setRemoved(true);
+            posts.set(posts.indexOf(p), p);
             return true;
         }
         return false;
@@ -52,7 +58,7 @@ public class PostRepositoryImpl implements PostRepository {
 
     private Post findPostById(long id) {
         return posts.stream()
-                .filter(p -> p.getId() == id)
+                .filter(p -> p.getId() == id && !p.isRemoved())
                 .findFirst()
                 .orElse(null);
     }

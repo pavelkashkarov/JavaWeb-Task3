@@ -6,6 +6,7 @@ public class Post {
 
     private long id;
     private String content;
+    private boolean isRemoved;
 
     public Post() {
     }
@@ -31,17 +32,25 @@ public class Post {
         this.content = content;
     }
 
+    public boolean isRemoved() {
+        return isRemoved;
+    }
+
+    public void setRemoved(boolean removed) {
+        isRemoved = removed;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post post = (Post) o;
-        return id == post.id && Objects.equals(content, post.content);
+        return id == post.id && isRemoved == post.isRemoved && Objects.equals(content, post.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, content);
+        return Objects.hash(id, content, isRemoved);
     }
 
     @Override
